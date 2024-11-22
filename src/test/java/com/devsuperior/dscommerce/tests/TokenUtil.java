@@ -4,11 +4,12 @@ package com.devsuperior.dscommerce.tests;
 import io.restassured.path.json.JsonPath;
 import  io.restassured.response.Response;
 
+import static io.restassured.RestAssured.*;
 import static io.restassured.matcher.RestAssuredMatchers.*;
 import static org.hamcrest.Matchers.*;
 
 
-import static io.restassured.RestAssured.*;
+
 
 
 
@@ -17,8 +18,8 @@ public class TokenUtil {
 	public static String obtainAccessToken(String username, String password) {
 		Response response = authRequest(username, password);
 		JsonPath jsonBody = response.jsonPath();
-		return jsonBody.getString("access token");
-		
+		return jsonBody.getString("access_token")
+;		
 	}
 	
 	private static Response authRequest(String username, String password) {
