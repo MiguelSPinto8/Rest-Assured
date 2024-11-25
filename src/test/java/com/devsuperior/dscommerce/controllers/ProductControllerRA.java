@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +29,9 @@ public class ProductControllerRA {
 	private String clientToken, adminToken, invalidToken;
 	private Long existingProductId, nonExistingProductId, dependentProductId;
 	private String productName;
+	
 	private Map<String, Object> postProductInstance;
+	private Map<String, Object> putProductInstance;
 	
 	@BeforeEach
 	public void setUp() throws Exception{
@@ -48,6 +51,14 @@ public class ProductControllerRA {
 		postProductInstance.put("description", "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Qui ad, adipisci illum ipsam velit et odit eaque reprehenderit ex maxime delectus dolore labore, quisquam quae tempora natus esse aliquam veniam doloremque quam minima culpa alias maiores commodi. Perferendis enim");
 		postProductInstance.put("imgUrl", "https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg");
 		postProductInstance.put("price", 50.0);
+		
+		
+		putProductInstance = new HashMap<>();
+		putProductInstance.put("name", "Produto atualizado");
+		putProductInstance.put("description", "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Qui ad, adipisci illum ipsam velit et odit eaque reprehenderit ex maxime delectus dolore labore, quisquam quae tempora natus esse aliquam veniam doloremque quam minima culpa alias maiores commodi. Perferendis enim");
+		putProductInstance.put("imgUrl", "https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg");
+		putProductInstance.put("price", 200.0);
+		
 		List<Map<String, Object>> categories = new ArrayList<>();
 		Map<String, Object> category1 = new HashMap<>();
 		category1.put("id", 2);
@@ -59,6 +70,8 @@ public class ProductControllerRA {
 		categories.add(category2);
 		
 		postProductInstance.put("categories", categories);
+		putProductInstance.put("categories", categories);
+
 
 
 
@@ -67,8 +80,6 @@ public class ProductControllerRA {
 	@Test
 	public void findByIdShouldReturnProductWhenIdExists() {
 		existingProductId = 2L;
-		
-		
 		
 		given()
 			.get("/products/{id}", existingProductId)
@@ -115,13 +126,12 @@ public class ProductControllerRA {
 
 	}
 	@Test
-	public void insertShouldReturnProductCreatedWhileAdminLogged() {
-		
+	public void insertShouldReturnProductCreatedWhenAdminLogged() throws JSONException {
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -130,19 +140,19 @@ public class ProductControllerRA {
 		.then()
 			.statusCode(201)
 			.body("name", equalTo("Meu produto"))
-			.body("price", is(50.0F))
+			.body("price", is(50.0f))
 			.body("imgUrl", equalTo("https://raw.githubusercontent.com/devsuperior/dscatalog-resources/master/backend/img/1-big.jpg"))
-			.body("categories.id", hasItems(2,3));	
+			.body("categories.id", hasItems(2, 3));
 	}
 	
 	@Test
-	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndInvalidName() {
+	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndInvalidName() throws JSONException {
 		postProductInstance.put("name", "ab");
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -154,13 +164,13 @@ public class ProductControllerRA {
 	}
 	
 	@Test
-	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndInvalidDescription() { 
+	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndInvalidDescription() throws JSONException { 
 		postProductInstance.put("description", "ab");
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -168,17 +178,17 @@ public class ProductControllerRA {
 			.post("/products")
 		.then()
 			.statusCode(422)
-			.body("errors.message[0]", equalTo("Descrição precisa de ter no mínimo 10 caracteres"));
+			.body("errors.message[0]", equalTo("Descrição precisa ter no mínimo 10 caracteres"));
 		
 	}
 	@Test
-	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndPriceIsNegative() { 
-		postProductInstance.put("price", -50.0);
+	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndPriceIsNegative() throws JSONException{ 
+		postProductInstance.put("price", -2.0);
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -190,13 +200,13 @@ public class ProductControllerRA {
 		
 	}
 	@Test
-	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndPriceIsZero() { 
+	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndPriceIsZero()throws JSONException { 
 		postProductInstance.put("price", 0);
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -208,13 +218,13 @@ public class ProductControllerRA {
 		
 	}
 	@Test
-	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndProductHasNoCategory() { 
-		postProductInstance.put("category", null);
+	public void insertShouldReturnUnprocessableEntityWhileAdminLoggedAndProductHasNoCategory()throws JSONException { 
+		postProductInstance.put("categories", null);
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -226,12 +236,12 @@ public class ProductControllerRA {
 		
 	}
 	@Test
-	public void insertShouldReturnForbiddenWhenClientLogged() {
+	public void insertShouldReturnForbiddenWhenClientLogged()throws JSONException {
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
 			.header("Content-type", "application/json")
-			.header("Authorization", "Bearer" + clientToken)
+			.header("Authorization", "Bearer " + clientToken)
 			.body(newProduct)
 			.contentType(ContentType.JSON)
 			.accept(ContentType.JSON)
@@ -241,7 +251,7 @@ public class ProductControllerRA {
 			.statusCode(403);
 	}
 	@Test
-	public void insertShouldReturnUnauthorizedWhenInvalidToken() {
+	public void insertShouldReturnUnauthorizedWhenInvalidToken()throws JSONException {
 		JSONObject newProduct = new JSONObject(postProductInstance);
 		
 		given()
@@ -256,58 +266,58 @@ public class ProductControllerRA {
 			.statusCode(401);
 	}
 	@Test
-	public void deleteShouldReturnNoContentWhenIdExistsAndAdminLogged() {
-		existingProductId = 25L;
+	public void deleteShouldReturnNoContentWhenIdExistsAndAdminLogged() throws Exception {
+		existingProductId = 19L;
 		
 		given()
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 		.when()
 			.delete("/products/{id}", existingProductId)
 		.then()
 			.statusCode(204);
 	}
 	@Test
-	public void deleteShouldReturnNotFoundWhenIdDoesNotExistAndAdminLogged() {
+	public void deleteShouldReturnNotFoundWhenIdDoesNotExistAndAdminLogged() throws JSONException{
 		nonExistingProductId = 100L;
 		
 		given()
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 		.when()
 			.delete("/products/{id}", nonExistingProductId)
 		.then()
 			.statusCode(404)
-			.body("error" , equalTo("Recurso não encontrado"))
+			.body("error", equalTo("Recurso não encontrado"))
 			.body("status", equalTo(404));
 	}
 	
 	@Test
-	public void deleteShouldReturnBadRequestWhenDependentIdAndAdminLogged() {
+	public void deleteShouldReturnBadRequestWhenDependentIdAndAdminLogged() throws JSONException{
 		dependentProductId = 3L;
 		
 		given()
-			.header("Authorization", "Bearer" + adminToken)
+			.header("Authorization", "Bearer " + adminToken)
 		.when()
 			.delete("/products/{id}", dependentProductId)
 		.then()
 			.statusCode(400);
 	}
 	@Test
-	public void deleteShouldReturnForbiddenWhenClientLogged() {
-		existingProductId = 25L;
-
+	public void deleteShouldReturnForbiddenWhenClientLogged() throws JSONException{
+		existingProductId = 24L;
+		
 		given()
-			.header("Authorization", "Bearer" + clientToken)
+			.header("Authorization", "Bearer " + clientToken)
 		.when()
 			.delete("/products/{id}", existingProductId)
 		.then()
 			.statusCode(403);
 	}
 	@Test
-	public void deleteShouldReturnUnauthorizedWhenClientLogged() {	
+	public void deleteShouldReturnUnauthorizedWhenClientLogged() throws JSONException{	
 		existingProductId = 25L;
-
+		
 		given()
-			.header("Authorization", "Bearer" + clientToken)
+			.header("Authorization", "Bearer " + invalidToken)
 		.when()
 			.delete("/products/{id}", existingProductId)
 		.then()
